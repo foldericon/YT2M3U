@@ -23,16 +23,16 @@ sub get_infos {
 	my ($length, $title) = "";
 	my $response = $ua->get("https://youtube.com/watch?v=".$id);
 	if($response->decoded_content =~ m{"length_seconds": (\d{1,4}), }) {
-        $length = $1;
+		$length = $1;
 		if($response->decoded_content =~ m{<title>(.*?)</title>}) {
-             $title = decode_entities($1);
-			 $title =~ s/ - YouTube$//;
+			$title = decode_entities($1);
+			$title =~ s/ - YouTube$//;
 		}   
-    } else {
-        next;
-    }   
+	} else {
+		next;
+	}   
 	print "#EXTINF:$length,$title\n" if($title ne "" && $length ne "");
-    print $yt->get_video_url($_) . "\n";
+	print $yt->get_video_url($_) . "\n";
 }
 
 my @urls = (join(" ", @ARGV) =~ m/(https?:\/\/(?:youtu\.be\/|(?:[a-z]{2,3}\.)?youtube\.com\/watch(?:\?|#\!)v=)[\w-]{11}\S*)/g);
