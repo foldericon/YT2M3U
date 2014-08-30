@@ -21,17 +21,15 @@ sub get_infos {
 	my $yt = WWW::YouTube::Download->new;
 	my ($length, $title) = "";
 	my $response = $ua->get("https://youtube.com/watch?v=".$id);
-	if($response->decoded_content =~ m{"length_seconds": (\d{1,4}), }) {
+	if($response->decoded_content =~ m/"length_seconds": (\d{1,4}), /) {
 		$length = $1;
-		if($response->decoded_content =~ m{<title>(.*?)</title>}) {
+		if($response->decoded_content =~ m/<title>(.*?)<\/title>/) {
 			$title = decode_entities($1);
 			$title =~ s/ - YouTube$//;
 		}   
-	} else {
-		next;
-	}   
-	print "#EXTINF:$length,$title\n" if($title ne "" && $length ne "");
-	print $yt->get_video_url($_) . "\n";
+		print "#EXTINF:$length,$title\n" if($title ne "");
+		print $yt->get_video_url($_) . "\n";		
+	}
 }
 
 my @urls = (join(" ", @ARGV) =~ m/(https?:\/\/(?:youtu\.be\/|(?:[a-z]{2,3}\.)?youtube\.com\/watch(?:\?|#\!)v=)[\w-]{11}\S*)/g);
@@ -45,5 +43,5 @@ print "#EXTM3U\n";
 my $ua = LWP::UserAgent->new(timeout => 20);
 foreach (@urls) {
 	get_infos(WWW::YouTube::Download->new->video_id($_)) if($_ !~ m/list=/);
-	get_infos($_) foreach ($ua->get($_)->decoded_content  =~ m/href="\/watch\?v=(.\S+?)&amp;\S+"/g);
+	get_infos($_) foreach ($ua->get($_)->decoded_content  =~ m/href="\/watch\?v=(\S+?)&amp;\S+"/g);
 }
